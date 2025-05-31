@@ -1,6 +1,6 @@
-# 🌾 Crop Recommendation System
+# 🌾 CropMate
 
-**Deployed App:** [Crop Recommendation System](https://crop-recommendation-pranshugarg-dev.streamlit.app/)
+**Deployed App:** [Crop Recommendation System](https://pranshugarg-cropmate.streamlit.app/)
 
 This **machine learning-based** web app helps farmers and agricultural experts determine the best crop to grow based on soil and weather conditions.
 
