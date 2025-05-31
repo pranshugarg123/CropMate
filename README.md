@@ -1,28 +1,41 @@
 # 🌾 CropMate
 
-**Deployed App:** [Crop Recommendation System](https://pranshugarg-cropmate.streamlit.app/)
+**Deployed App:** [🌱 Crop Recommendation System](https://pranshugarg-cropmate.streamlit.app/)
 
-This **machine learning-based** web app helps farmers and agricultural experts determine the best crop to grow based on soil and weather conditions.
+CropMate is a **machine learning-based web app** that helps farmers and agricultural experts determine the best crop to grow based on **soil and weather conditions**.
+
+---
+
+## 🖼 🚀 Live Preview
+
+<img width="100%" alt="CropMate Demo Screenshot" src="https://github.com/user-attachments/assets/cf343a50-9d1c-4b73-a3c2-e66e15574984" />
+
+---
 
 ## 🚀 Features
 
-- 📊 **Predict the best crop** based on:
+- 📊 **Predict the best crop** using:
   - **Nitrogen (N)**, **Phosphorus (P)**, **Potassium (K)**
   - **Temperature (°C)**, **Humidity (%)**
   - **pH Level**, **Rainfall (mm)**
-- 🔍 **Scales inputs** before making predictions
-- 🌱 **22 different crops** supported
+- 🔍 Input data is **scaled** before making predictions
+- 🌱 Supports **22 different crops**
+
+---
 
 ## 🛠 Tech Stack
 
-- **Python**, **Streamlit**
-- **Scikit-learn**, **NumPy**
-- **Machine Learning Model (Random Forest/SVM/etc.)**
-- **Pickle for model storage**
+- **Python**
+- **Streamlit** (UI)
+- **Scikit-learn**, **NumPy** (ML)
+- **Pickle** (Model storage)
+
+---
 
 ## 📦 Installation & Usage
 
 ### 1️⃣ Clone the Repository
+
 ```sh
 git clone https://github.com/pranshugarg-dev/crop-recommendation.git
 cd crop-recommendation
