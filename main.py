@@ -5,7 +5,7 @@ from streamlit_option_menu import option_menu
 import numpy as np
 
 # Set page configuration
-st.set_page_config(page_title="🌾 Crop Recommendation System",
+st.set_page_config(page_title="🌾 CropMate",
                    layout="wide",
                    page_icon="🌱")
 
@@ -29,7 +29,7 @@ crop_dict = {
 
 # Sidebar navigation
 with st.sidebar:
-    selected = option_menu("Crop Recommendation",
+    selected = option_menu("CropMate",
                            ["Predict Crop"],
                            menu_icon="leaf",
                            icons=["search"],
@@ -37,9 +37,14 @@ with st.sidebar:
 
 # Crop Prediction Page
 if selected == "Predict Crop":
-    st.title("🌾 Crop Recommendation System")
-    st.write("Enter soil and weather parameters to get the best crop recommendation.")
-
+    st.title("🌾 CropMate")
+    st.subheader("Your Smart Assistant for Crop Recommendation")
+    st.markdown(
+        "CropMate helps farmers and agri-experts make better crop choices "
+        "by analyzing soil nutrients, weather conditions, and rainfall. 🌱\n\n"
+        "**Just enter the details below to get the best crop suggestion for your land.**"
+    )
+    st.divider()
 
     # User input form
     col1, col2, col3 = st.columns(3)
@@ -57,6 +62,12 @@ if selected == "Predict Crop":
     with col3:
         rainfall = st.number_input("Rainfall (mm)", min_value=0.0, max_value=500.0)
 
+    st.markdown(
+        "ℹ️ **Input Tips:**\n"
+        "- Use recent soil test reports to get N, P, K, and pH values.\n"
+        "- Use average temperature, humidity, and rainfall for your region.\n"
+    )
+
     # Predict Crop
     if st.button("🔍 Recommend Crop"):
         user_input = np.array([[N, P, K, temperature, humidity, pH, rainfall]])
@@ -69,4 +80,12 @@ if selected == "Predict Crop":
         predicted_label = model.predict(user_input_final)[0]
         predicted_crop = crop_dict.get(predicted_label, "Unknown Crop")
 
-        st.success(f"🌱 Recommended Crop: **{predicted_crop}**")
+        st.success(f"🌱 **Recommended Crop: {predicted_crop}**")
+        st.info("✅ This crop is best suited to your current soil and climate conditions.")
+
+    # Footer
+    st.divider()
+    st.markdown(
+        "<center><small>🔬 Powered by Machine Learning | 🤝 Designed for Farmers | 🌍 Project: CropMate</small></center>",
+        unsafe_allow_html=True
+    )
