@@ -2,40 +2,45 @@
 
 **Deployed App:** [🌱 Crop Recommendation System](https://pranshugarg-cropmate.streamlit.app/)
 
-CropMate is a **machine learning-based web app** that helps farmers and agricultural experts determine the best crop to grow based on **soil and weather conditions**.
+CropMate is a **machine learning-powered web app** that helps farmers and agricultural experts recommend the best crop to grow based on **soil nutrients, weather conditions, and rainfall**.
 
 ---
 
 ## 🖼 🚀 Live Preview
 
-<img width="100%" alt="CropMate Demo Screenshot" src="https://github.com/user-attachments/assets/cf343a50-9d1c-4b73-a3c2-e66e15574984" />
+*Insert your latest app screenshot here*
 
 ---
 
 ## 🚀 Features
 
-- 📊 **Predict the best crop** using:
-  - **Nitrogen (N)**, **Phosphorus (P)**, **Potassium (K)**
-  - **Temperature (°C)**, **Humidity (%)**
-  - **pH Level**, **Rainfall (mm)**
-- 🔍 Input data is **scaled** before making predictions
-- 🌱 Supports **22 different crops**
+- 📊 Predict the best crop using:
+  - **Soil nutrients:** Nitrogen (N), Phosphorus (P), Potassium (K)
+  - **Weather data:** Temperature (°C), Humidity (%)
+  - **Soil pH level** and **Rainfall (mm)**
+- 🌍 **Auto-fetch Temperature and Humidity** by entering your city name via OpenWeatherMap API integration  
+- 🔍 Input values are **scaled with MinMaxScaler and StandardScaler** before prediction for better accuracy  
+- 📄 Generates a **downloadable PDF report** summarizing input parameters, recommended crop, and crop info  
+- 🌱 Supports recommendations for **22 different crops**
 
 ---
 
 ## 🛠 Tech Stack
 
-- **Python**
-- **Streamlit** (UI)
-- **Scikit-learn**, **NumPy** (ML)
-- **Pickle** (Model storage)
+- Python  
+- Streamlit (UI)  
+- Scikit-learn (ML model)  
+- NumPy (data processing)  
+- Requests (API calls)  
+- FPDF (PDF generation)  
+- Pickle (model serialization)
 
 ---
 
 ## 📦 Installation & Usage
 
-### 1️⃣ Clone the Repository
+### 1️⃣ Clone the repository
 
-```sh
+```bash
 git clone https://github.com/pranshugarg-dev/crop-recommendation.git
 cd crop-recommendation
