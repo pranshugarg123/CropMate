@@ -64,6 +64,7 @@ def fetch_weather(city):
             humidity = data["main"]["humidity"]
             rainfall = 0.0
             if "rain" in data:
+                # rain data might be in 1h or 3h buckets
                 if "1h" in data["rain"]:
                     rainfall = data["rain"]["1h"]
                 elif "3h" in data["rain"]:
