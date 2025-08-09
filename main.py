@@ -46,21 +46,26 @@ with st.sidebar:
 # -------------------
 # Weather API helper
 # -------------------
-def fetch_weather(city):
-    """Fetch temperature and humidity for a city using OpenWeatherMap API key from secrets."""
-    api_key = st.secrets["OPENWEATHERMAP_API_KEY"]
+def fetch_weather(city, api_key):
+    url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
     try:
-        url = "https://api.openweathermap.org/data/2.5/weather"
-        params = {"q": city, "appid": api_key, "units": "metric"}
-        response = requests.get(url, params=params)
+        response = requests.get(url)
         data = response.json()
-        if response.status_code == 200 and "main" in data:
-            return data["main"]["temp"], data["main"]["humidity"]
+        if response.status_code == 200:
+            temp = data["main"]["temp"]
+            humidity = data["main"]["humidity"]
+            rainfall = 0.0
+            if "rain" in data:
+                if "1h" in data["rain"]:
+                    rainfall = data["rain"]["1h"]
+                elif "3h" in data["rain"]:
+                    rainfall = data["rain"]["3h"]
+            return temp, humidity, rainfall
         else:
-            return None, None
-    except Exception as e:
-        st.error(f"Error fetching weather data: {e}")
-        return None, None
+            return None, None, None
+    except:
+        return None, None, None
+
 
 # -------------------
 # PDF generation helper
