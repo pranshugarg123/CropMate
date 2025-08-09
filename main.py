@@ -47,34 +47,21 @@ with st.sidebar:
 # Weather API helper
 # -------------------
 def fetch_weather(city):
-    """Fetch temperature, humidity, and rainfall for a city from OpenWeatherMap API."""
-    try:
-        api_key = st.secrets["OPENWEATHERMAP_API_KEY"]
-    except KeyError:
-        st.error("OpenWeatherMap API key not found in Streamlit secrets.")
-        return None, None, None
-
+    """Fetch temperature and humidity for a city using OpenWeatherMap API key from secrets."""
+    api_key = st.secrets["OPENWEATHERMAP_API_KEY"]
     try:
         url = "https://api.openweathermap.org/data/2.5/weather"
         params = {"q": city, "appid": api_key, "units": "metric"}
         response = requests.get(url, params=params)
         data = response.json()
         if response.status_code == 200 and "main" in data:
-            temp = data["main"]["temp"]
-            humidity = data["main"]["humidity"]
-            rainfall = 0.0
-            if "rain" in data:
-                # rain data might be in 1h or 3h buckets
-                if "1h" in data["rain"]:
-                    rainfall = data["rain"]["1h"]
-                elif "3h" in data["rain"]:
-                    rainfall = data["rain"]["3h"]
-            return temp, humidity, rainfall
+            return data["main"]["temp"], data["main"]["humidity"]
         else:
-            return None, None, None
+            return None, None
     except Exception as e:
         st.error(f"Error fetching weather data: {e}")
-        return None, None, None
+        return None, None
+
 
 # -------------------
 # PDF generation helper
@@ -157,16 +144,16 @@ if selected == "Predict Crop":
     st.divider()
 
     # Weather autofill
-    temperature, humidity, rainfall = None, None, None
-    use_api = st.checkbox("📍 Auto-fill Temperature, Humidity & Rainfall using City Name")
+    temperature, humidity = None, None
+    use_api = st.checkbox("📍 Auto-fill Temperature & Humidity using City Name")
 
     if use_api:
         city = st.text_input("Enter your city name:")
         if city:
-            temp, hum, rain = fetch_weather(city)
+            temp, hum = fetch_weather(city)
             if temp is not None:
-                temperature, humidity, rainfall = temp, hum, rain
-                st.success(f"Weather fetched: 🌡 {temp}°C, 💧 {hum}%, 🌧 Rainfall: {rain} mm")
+                temperature, humidity = temp, hum
+                st.success(f"Weather fetched: 🌡 {temp}°C, 💧 {hum}%")
             else:
                 st.error("❌ Could not fetch weather data. Please enter manually.")
 
@@ -186,10 +173,7 @@ if selected == "Predict Crop":
         pH = st.number_input("pH Level (0-14)", min_value=0.0, max_value=14.0)
 
     with col3:
-        if rainfall is None:
-            rainfall = st.number_input("Rainfall (mm)", min_value=0.0, max_value=500.0)
-        else:
-            st.write(f"Rainfall (mm) (auto-filled): {rainfall:.2f}")
+        rainfall = st.number_input("Rainfall (mm)", min_value=0.0, max_value=500.0)
 
     # Prediction button
     if st.button("🔍 Recommend Crop"):
