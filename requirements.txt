@@ -1,5 +1,6 @@
 streamlit
 streamlit-option-menu
-scikit-learn
-pickle-mixin
 numpy
+requests
+fpdf
+scikit-learn
