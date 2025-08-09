@@ -1,4 +1,3 @@
-import os
 import pickle
 import streamlit as st
 from streamlit_option_menu import option_menu
@@ -7,10 +6,14 @@ import requests
 from fpdf import FPDF
 from datetime import datetime
 
-# Set page configuration
+# -------------------
+# Streamlit page config
+# -------------------
 st.set_page_config(page_title="🌾 CropMate", layout="wide", page_icon="🌱")
 
-# Load the model
+# -------------------
+# Load model & scalers
+# -------------------
 pkl_path = "crop_recommendation.pkl"
 with open(pkl_path, "rb") as file:
     data = pickle.load(file)
@@ -19,7 +22,7 @@ model = data["model"]
 minmax_scaler = data["minmax_scaler"]
 standard_scaler = data["standard_scaler"]
 
-# Crop label dictionary
+# Crop labels
 crop_dict = {
     1: "Rice", 2: "Maize", 3: "Jute", 4: "Cotton", 5: "Coconut",
     6: "Papaya", 7: "Orange", 8: "Apple", 9: "Muskmelon", 10: "Watermelon",
@@ -28,7 +31,9 @@ crop_dict = {
     20: "Kidneybeans", 21: "Chickpea", 22: "Coffee"
 }
 
+# -------------------
 # Sidebar navigation
+# -------------------
 with st.sidebar:
     selected = option_menu(
         "CropMate",
@@ -38,10 +43,13 @@ with st.sidebar:
         default_index=0
     )
 
-# Function to fetch weather data
+# -------------------
+# Weather API helper
+# -------------------
 def fetch_weather(city, api_key):
-    url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
     try:
+        url = "http://api.openweathermap.org/data/2.5/weather"
+        params = {"q": city, "appid": api_key, "units": "metric"}
         response = requests.get(url)
         data = response.json()
         if response.status_code == 200:
@@ -51,7 +59,9 @@ def fetch_weather(city, api_key):
     except:
         return None, None
 
-# Function to generate PDF
+# -------------------
+# PDF generation helper
+# -------------------
 def generate_pdf(inputs, prediction):
     pdf = FPDF()
     pdf.add_page()
@@ -73,7 +83,9 @@ def generate_pdf(inputs, prediction):
     pdf.output(file_path)
     return file_path
 
+# -------------------
 # Crop Prediction Page
+# -------------------
 if selected == "Predict Crop":
     st.title("🌾 CropMate")
     st.subheader("Your Smart Assistant for Crop Recommendation")
@@ -84,24 +96,28 @@ if selected == "Predict Crop":
     )
     st.divider()
 
-    # Weather API option
-    use_api = st.checkbox("Fetch Temperature & Humidity from City (Weather API)")
+    # Read API key from secrets
+    api_key = st.secrets.get("OPENWEATHERMAP_API_KEY", "")
+
+    # Weather autofill
     temperature = None
     humidity = None
+    use_api = st.checkbox("📍 Auto-fill Temperature & Humidity using City Name")
 
     if use_api:
-        api_key = st.text_input("Enter your OpenWeatherMap API Key:")
         city = st.text_input("Enter your city name:")
-        if api_key and city:
+        if city and api_key:
             temp, hum = fetch_weather(city, api_key)
             if temp is not None:
                 temperature = temp
                 humidity = hum
-                st.success(f"Fetched Weather → Temperature: {temp}°C, Humidity: {hum}%")
+                st.success(f"Weather fetched: 🌡 {temp}°C, 💧 {hum}%")
             else:
-                st.error("Failed to fetch weather data. Check API key or city name.")
+                st.error("❌ Could not fetch weather data. Please enter manually.")
+        elif city and not api_key:
+            st.error("⚠️ API key missing. Please set it in your Streamlit secrets.")
 
-    # User input form
+    # User inputs
     col1, col2, col3 = st.columns(3)
 
     with col1:
@@ -125,39 +141,42 @@ if selected == "Predict Crop":
         "- Use average temperature, humidity, and rainfall for your region.\n"
     )
 
-    # Predict Crop
+    # Prediction button
     if st.button("🔍 Recommend Crop"):
-        user_input = np.array([[N, P, K, temperature, humidity, pH, rainfall]])
+        try:
+            user_input = np.array([[N, P, K, temperature, humidity, pH, rainfall]])
 
-        # Apply scalers
-        user_input_scaled = minmax_scaler.transform(user_input)
-        user_input_final = standard_scaler.transform(user_input_scaled)
+            # Scale features
+            user_input_scaled = minmax_scaler.transform(user_input)
+            user_input_final = standard_scaler.transform(user_input_scaled)
 
-        # Make prediction
-        predicted_label = model.predict(user_input_final)[0]
-        predicted_crop = crop_dict.get(predicted_label, "Unknown Crop")
+            # Predict
+            predicted_label = model.predict(user_input_final)[0]
+            predicted_crop = crop_dict.get(predicted_label, "Unknown Crop")
 
-        st.success(f"🌱 **Recommended Crop: {predicted_crop}**")
-        st.info("✅ This crop is best suited to your current soil and climate conditions.")
+            st.success(f"🌱 **Recommended Crop: {predicted_crop}**")
+            st.info("✅ This crop is best suited to your current soil and climate conditions.")
 
-        # PDF Download
-        inputs = {
-            "Nitrogen": N,
-            "Phosphorus": P,
-            "Potassium": K,
-            "Temperature": temperature,
-            "Humidity": humidity,
-            "pH": pH,
-            "Rainfall": rainfall
-        }
-        pdf_path = generate_pdf(inputs, predicted_crop)
-        with open(pdf_path, "rb") as pdf_file:
-            st.download_button(
-                label="📄 Download Recommendation Report",
-                data=pdf_file,
-                file_name="crop_recommendation_report.pdf",
-                mime="application/pdf"
-            )
+            # Generate PDF
+            inputs = {
+                "Nitrogen": N,
+                "Phosphorus": P,
+                "Potassium": K,
+                "Temperature": temperature,
+                "Humidity": humidity,
+                "pH": pH,
+                "Rainfall": rainfall
+            }
+            pdf_path = generate_pdf(inputs, predicted_crop)
+            with open(pdf_path, "rb") as pdf_file:
+                st.download_button(
+                    label="📄 Download Recommendation Report",
+                    data=pdf_file,
+                    file_name="crop_recommendation_report.pdf",
+                    mime="application/pdf"
+                )
+        except Exception as e:
+            st.error(f"Error during prediction: {e}")
 
     # Footer
     st.divider()
