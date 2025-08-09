@@ -66,25 +66,69 @@ def fetch_weather(city):
 # PDF generation helper
 # -------------------
 def generate_pdf(inputs, prediction):
+    crop_info = {
+        "Rice": "Rice is a staple food crop with high demand worldwide. Requires flooded fields and moderate temperature.",
+        "Maize": "Maize is versatile and used for food, fodder, and biofuel. Prefers warm climate with adequate rainfall.",
+        "Jute": "Jute is a fiber crop, important for textile industries. Grows well in warm and humid climate.",
+        "Cotton": "Cotton is used in textile manufacturing. Thrives in warm climates with moderate rainfall.",
+        "Coconut": "Coconut palms require coastal tropical climates and well-drained sandy soils.",
+        "Papaya": "Papaya is a tropical fruit crop with high vitamin content, grows best in warm regions.",
+        "Orange": "Oranges require subtropical climates and well-drained soils for best fruit quality.",
+        "Apple": "Apples thrive in temperate climates with cold winters and warm summers.",
+        "Muskmelon": "Muskmelons grow best in warm climates with plenty of sunlight.",
+        "Watermelon": "Watermelons require warm weather and sandy loam soils.",
+        "Grapes": "Grapes are grown for fresh fruit and wine; prefer warm, dry climates.",
+        "Mango": "Mangoes flourish in tropical and subtropical climates with dry seasons.",
+        "Banana": "Bananas grow well in tropical areas with rich, well-drained soils.",
+        "Pomegranate": "Pomegranates prefer semi-arid climates with cool winters.",
+        "Lentil": "Lentils are cool-season legumes, important for protein-rich diets.",
+        "Blackgram": "Blackgram is a pulse crop grown in warm climates, improves soil fertility.",
+        "Mungbean": "Mungbeans are short-duration legumes grown in warm climates.",
+        "Mothbeans": "Mothbeans are drought-tolerant legumes, suitable for arid regions.",
+        "Pigeonpeas": "Pigeonpeas are drought-tolerant legumes, important in dry farming.",
+        "Kidneybeans": "Kidneybeans are grown in temperate to subtropical climates.",
+        "Chickpea": "Chickpeas prefer cool climates and are a major pulse crop.",
+        "Coffee": "Coffee grows best in tropical highlands with rich soil."
+    }
+
     pdf = FPDF()
     pdf.add_page()
-    pdf.set_font("Arial", "B", 16)
-    pdf.cell(200, 10, "Crop Recommendation Report", ln=True, align="C")
 
+    # Title
+    pdf.set_font("Arial", "B", 18)
+    pdf.cell(0, 10, "Crop Recommendation Report", ln=True, align="C")
+
+    pdf.ln(5)
+    pdf.set_font("Arial", "I", 12)
+    pdf.cell(0, 10, f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M')}", ln=True, align="C")
+
+    pdf.ln(15)
+    pdf.set_font("Arial", "B", 14)
+    pdf.cell(0, 10, "Input Parameters", ln=True)
     pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M')}", ln=True)
-
-    pdf.ln(5)
-    pdf.cell(200, 10, "Input Parameters:", ln=True)
     for key, val in inputs.items():
-        pdf.cell(200, 10, f"{key}: {val}", ln=True)
+        pdf.cell(0, 8, f"- {key}: {val}", ln=True)
 
-    pdf.ln(5)
-    pdf.cell(200, 10, f"Recommended Crop: {prediction}", ln=True)
+    pdf.ln(10)
+    pdf.set_font("Arial", "B", 14)
+    pdf.cell(0, 10, "Recommended Crop", ln=True)
+    pdf.set_font("Arial", "B", 16)
+    pdf.cell(0, 10, prediction, ln=True, align="C")
+
+    # Crop info paragraph
+    pdf.ln(10)
+    pdf.set_font("Arial", size=12)
+    info_text = crop_info.get(prediction, "No additional information available for this crop.")
+    pdf.multi_cell(0, 8, info_text)
+
+    pdf.ln(20)
+    pdf.set_font("Arial", "I", 10)
+    pdf.cell(0, 10, "Thank you for using CropMate!", ln=True, align="C")
 
     file_path = "crop_recommendation_report.pdf"
     pdf.output(file_path)
     return file_path
+
 
 # -------------------
 # Crop Prediction Page
