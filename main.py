@@ -46,17 +46,20 @@ with st.sidebar:
 # -------------------
 # Weather API helper
 # -------------------
-def fetch_weather(city, api_key):
+def fetch_weather(city):
+    """Fetch temperature and humidity for a city using OpenWeatherMap API key from secrets."""
+    api_key = st.secrets["OPENWEATHERMAP_API_KEY"]
     try:
-        url = "http://api.openweathermap.org/data/2.5/weather"
+        url = "https://api.openweathermap.org/data/2.5/weather"
         params = {"q": city, "appid": api_key, "units": "metric"}
-        response = requests.get(url)
+        response = requests.get(url, params=params)
         data = response.json()
-        if response.status_code == 200:
+        if response.status_code == 200 and "main" in data:
             return data["main"]["temp"], data["main"]["humidity"]
         else:
             return None, None
-    except:
+    except Exception as e:
+        st.error(f"Error fetching weather data: {e}")
         return None, None
 
 # -------------------
@@ -91,31 +94,23 @@ if selected == "Predict Crop":
     st.subheader("Your Smart Assistant for Crop Recommendation")
     st.markdown(
         "CropMate helps farmers and agri-experts make better crop choices "
-        "by analyzing soil nutrients, weather conditions, and rainfall. 🌱\n\n"
-        "**Just enter the details below to get the best crop suggestion for your land.**"
+        "by analyzing soil nutrients, weather conditions, and rainfall. 🌱"
     )
     st.divider()
 
-    # Read API key from secrets
-    api_key = st.secrets.get("OPENWEATHERMAP_API_KEY", "")
-
     # Weather autofill
-    temperature = None
-    humidity = None
+    temperature, humidity = None, None
     use_api = st.checkbox("📍 Auto-fill Temperature & Humidity using City Name")
 
     if use_api:
         city = st.text_input("Enter your city name:")
-        if city and api_key:
-            temp, hum = fetch_weather(city, api_key)
+        if city:
+            temp, hum = fetch_weather(city)
             if temp is not None:
-                temperature = temp
-                humidity = hum
+                temperature, humidity = temp, hum
                 st.success(f"Weather fetched: 🌡 {temp}°C, 💧 {hum}%")
             else:
                 st.error("❌ Could not fetch weather data. Please enter manually.")
-        elif city and not api_key:
-            st.error("⚠️ API key missing. Please set it in your Streamlit secrets.")
 
     # User inputs
     col1, col2, col3 = st.columns(3)
@@ -135,12 +130,6 @@ if selected == "Predict Crop":
     with col3:
         rainfall = st.number_input("Rainfall (mm)", min_value=0.0, max_value=500.0)
 
-    st.markdown(
-        "ℹ️ **Input Tips:**\n"
-        "- Use recent soil test reports to get N, P, K, and pH values.\n"
-        "- Use average temperature, humidity, and rainfall for your region.\n"
-    )
-
     # Prediction button
     if st.button("🔍 Recommend Crop"):
         try:
@@ -155,7 +144,6 @@ if selected == "Predict Crop":
             predicted_crop = crop_dict.get(predicted_label, "Unknown Crop")
 
             st.success(f"🌱 **Recommended Crop: {predicted_crop}**")
-            st.info("✅ This crop is best suited to your current soil and climate conditions.")
 
             # Generate PDF
             inputs = {
@@ -178,7 +166,6 @@ if selected == "Predict Crop":
         except Exception as e:
             st.error(f"Error during prediction: {e}")
 
-    # Footer
     st.divider()
     st.markdown(
         "<center><small>🔬 Powered by Machine Learning | 🤝 Designed for Farmers | 🌍 Project: CropMate</small></center>",
