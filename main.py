@@ -91,40 +91,65 @@ def generate_pdf(inputs, prediction):
         "Chickpea": "Chickpeas prefer cool climates and are a major pulse crop.",
         "Coffee": "Coffee grows best in tropical highlands with rich soil."
     }
+    class PDF(FPDF):
+        def header(self):
+            # Logo (optional, add your logo file if you have one)
+            # self.image('logo.png', 10, 8, 33)
+            self.set_font('Arial', 'B', 16)
+            self.set_text_color(0, 102, 0)  # Dark green
+            self.cell(0, 10, '🌾 CropMate Crop Recommendation Report', 0, 1, 'C')
+            self.ln(5)
+            self.set_draw_color(0, 102, 0)
+            self.set_line_width(0.5)
+            self.line(10, 25, 200, 25)
+            self.ln(5)
 
-    pdf = FPDF()
+        def footer(self):
+            self.set_y(-15)
+            self.set_font('Arial', 'I', 8)
+            self.set_text_color(128)
+            self.cell(0, 10, f'Page {self.page_no()} | Powered by CropMate 🌱', 0, 0, 'C')
+
+    pdf = PDF()
     pdf.add_page()
 
-    # Title
-    pdf.set_font("Arial", "B", 18)
-    pdf.cell(0, 10, "Crop Recommendation Report", ln=True, align="C")
-
+    # Date and time
+    pdf.set_font('Arial', 'I', 10)
+    pdf.set_text_color(100)
+    pdf.cell(0, 10, f'Report generated on: {datetime.now().strftime("%Y-%m-%d %H:%M")}', 0, 1, 'R')
     pdf.ln(5)
-    pdf.set_font("Arial", "I", 12)
-    pdf.cell(0, 10, f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M')}", ln=True, align="C")
 
-    pdf.ln(15)
-    pdf.set_font("Arial", "B", 14)
-    pdf.cell(0, 10, "Input Parameters", ln=True)
-    pdf.set_font("Arial", size=12)
+    # Input parameters as a table
+    pdf.set_font('Arial', 'B', 14)
+    pdf.set_text_color(0, 51, 0)
+    pdf.cell(0, 10, 'Input Parameters:', 0, 1)
+    
+    pdf.set_font('Arial', '', 12)
+    col_width = 50
+    row_height = 8
     for key, val in inputs.items():
-        pdf.cell(0, 8, f"- {key}: {val}", ln=True)
+        pdf.set_fill_color(224, 235, 224)  # Light green background
+        pdf.cell(col_width, row_height, str(key), border=1, fill=True)
+        pdf.cell(col_width, row_height, str(val), border=1, ln=1, fill=False)
 
     pdf.ln(10)
-    pdf.set_font("Arial", "B", 14)
-    pdf.cell(0, 10, "Recommended Crop", ln=True)
-    pdf.set_font("Arial", "B", 16)
-    pdf.cell(0, 10, prediction, ln=True, align="C")
 
-    # Crop info paragraph
-    pdf.ln(10)
-    pdf.set_font("Arial", size=12)
+    # Recommended Crop Highlight
+    pdf.set_font('Arial', 'B', 16)
+    pdf.set_text_color(0, 102, 51)
+    pdf.cell(0, 10, f"Recommended Crop: {prediction}", 0, 1, 'C')
+    pdf.ln(5)
+
+    # Crop Description
+    pdf.set_font('Arial', '', 12)
+    pdf.set_text_color(0, 0, 0)
     info_text = crop_info.get(prediction, "No additional information available for this crop.")
     pdf.multi_cell(0, 8, info_text)
 
-    pdf.ln(20)
-    pdf.set_font("Arial", "I", 10)
-    pdf.cell(0, 10, "Thank you for using CropMate!", ln=True, align="C")
+    pdf.ln(10)
+    pdf.set_font('Arial', 'I', 10)
+    pdf.set_text_color(80)
+    pdf.cell(0, 10, "Thank you for using CropMate! Wishing you a fruitful harvest. 🌱", 0, 1, 'C')
 
     file_path = "crop_recommendation_report.pdf"
     pdf.output(file_path)
